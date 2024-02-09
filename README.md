@@ -108,14 +108,17 @@ $$
 
 Denoting by $\ \hat{}$ ${}$ the 2D Fourier transform in x and y and by $*$ the 2D convolution, the equation to solve then becomes
 
+<p align="center"> <img src="equation.png" align="center" width="5000"/> </p>
+<!---
 $$
 \begin{equation}
     \frac{\partial\hat{\omega}}{\partial t} = 
     \left(\frac{k_y}{\Vert\mathbf{k}\Vert^2}\hat{\omega}\right)*(k_x\hat{\omega})-
-    \left(\frac{k_x}{\Vert\mathbf{k}\Vert^2}\hat{\omega}\right)*(k )-
+    \left(\frac{k_x}{\Vert\mathbf{k}\Vert^2}\hat{\omega}\right)*(k_y\hat{\omega} )-
     \nu\Vert\mathbf{k}\Vert^2\hat{\omega}
 \end{equation}
 $$
+--->
 
 So far this naive implementation could suffer from **aliasing** in the nonlinear convection term of the RHS (the one with convolutions). When performing a discrete Fourier transform, too high frequencies could be treated as low frequencies. To solve this we pad all arrays with zeros, perform the operations on $3/2N$ points, and truncate the result back to $N$ points.
 
