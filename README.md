@@ -110,9 +110,9 @@ Denoting by $\ \hat{}$ ${}$ the 2D Fourier transform in x and y and by $*$ the 2
 
 $$
 \begin{equation}
-\frac{\partial\hat\omega}{\partial t} = 
-\left(\frac{k_y}{\Vert\mathbf{k}\Vert^2}\hat\omega\right)*(k_x\hat\omega)-\left(\frac{k_x}{\Vert\mathbf{k}\Vert^2}\hat\omega\right)*(k_y\hat\omega)-
-\nu\Vert\mathbf{k}\Vert^2\hat\omega
+\frac{\partial\hat \omega}{\partial t} = 
+\left(\frac{k_y}{\Vert\mathbf{k}\Vert^2}\hat \omega\right)*(k_x\hat \omega)-\left(\frac{k_x}{\Vert\mathbf{k}\Vert^2}\hat \omega\right)*(k_y\hat \omega)-
+\nu\Vert\mathbf{k}\Vert^2\hat \omega
 \end{equation}
 $$
 
