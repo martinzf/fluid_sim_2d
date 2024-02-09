@@ -110,7 +110,7 @@ Denoting by $\ \hat{}$ ${}$ the 2D Fourier transform in x and y and by $*$ the 2
 
 $$
 \begin{equation}
-    2 = 1+1
+    \frac{\partial\hat{\omega}}{\partial t} = 
 \end{equation}
 $$
 
