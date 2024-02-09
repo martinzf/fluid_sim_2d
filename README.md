@@ -112,7 +112,7 @@ $$
 \begin{equation}
     \frac{\partial\hat{\omega}}{\partial t} = 
     \left(\frac{k_y}{\Vert\mathbf{k}\Vert^2}\hat{\omega}\right)*(k_x\hat{\omega})-
-    \left(\frac{k_x}{\Vert\mathbf{k}\Vert^2}\hat{\omega}\right)
+    \left(\frac{k_x}{\Vert\mathbf{k}\Vert^2}\hat{\omega}\right)(k)-
     \nu\Vert\mathbf{k}\Vert^2\hat{\omega}
 \end{equation}
 $$
