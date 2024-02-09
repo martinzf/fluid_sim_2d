@@ -110,9 +110,7 @@ Denoting by $\ \hat{}$ ${}$ the 2D Fourier transform in x and y and by $*$ the 2
 
 $$
 \begin{equation}
-\frac{\partial\omega}{\partial t} = 
-\left(\frac{k_y}{\Vert\mathbf{k}\Vert^2} \omega\right)*(k_x\omega)-\left(\frac{k_x}{\Vert\mathbf{k}\Vert^2} \omega\right)*(k_y \omega)-
-\nu\Vert\mathbf{k}\Vert^2\omega
+    2 = 1+1
 \end{equation}
 $$
 
