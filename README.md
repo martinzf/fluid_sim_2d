@@ -3,15 +3,18 @@
 ### ABOUT
 WIP: A 2D simulation of an incompressible, viscous fluid built with Fortran90, wrapped with Python 3.11 via gfort2py.
 
+DISCLAIMER: This is an experiment on solving PDEs via Fourier Transform. This implies the simulation only works with periodic boundary conditions and is subject to the Gibbs phenomenon. In future simulations I plan on using Chebyshev transforms.
+
 ### PREVIEW
 
-### PLANNED INTERFACE
+### HOW TO USE
 
 1. Clone the repository and open its folder from the CLI.
 1. Run the command `pip install -r requirements.txt` to install dependencies.
 1. Run the command `python main.py`.
-1. A GUI with some predefined values will open. Here you can modify the parameters of the simulation with Python and NumPy expressions. The number of grid points is controlled by $N_x$ and $N_y$, the grid's side lengths should evaluate to floats. Viscosity, duration and time step should also evaluate to floats. The vorticity field should evaluate to a 2D NumPy array.
-1. Wait while the programme loads a Matplotlib window.
+1. A GUI with some predefined values will open. Here you can modify the parameters of the simulation with Python and NumPy expressions. The number of grid points is controlled by `Nx` and `Ny`, the grid's side lengths `Lx` and `Ly` should evaluate to floats. Viscosity (`nu`), duration (`t`) and time step (`dt`) should also evaluate to floats. The vorticity field should evaluate to a real 2D NumPy $(N_y, N_x)$ array &mdash; you may use any of the simulation parameters as well as `x` and `y` to define it.
+<p align="center"> <img src="gui.png" align="center" width="300"/> </p>
+5. Wait while the programme loads a Matplotlib window.
 
 ### COPYRIGHT
 
@@ -107,7 +110,9 @@ Denoting by $\ \hat{}$ ${}$ the 2D Fourier transform in x and y and by $*$ the 2
 
 $$
 \begin{equation}
-\frac{\partial\hat{\omega}}{\partial t}= \left(\frac{k_y}{\Vert\mathbf{k}\Vert^2}\hat{\omega}\right)*(k_x\hat{\omega})-\left(\frac{k_x}{\Vert\mathbf{k}\Vert^2}\hat{\omega}\right)*(k_y\hat{\omega})-\nu\Vert\mathbf{k}\Vert^2\hat{\omega}
+\frac{\partial\hat{\omega}}{\partial t} = 
+\left(\frac{k_y}{\Vert\mathbf{k}\Vert^2}\hat{\omega}\right)*(k_x\hat{\omega})-\left(\frac{k_x}{\Vert\mathbf{k}\Vert^2}\hat{\omega}\right)*(k_y\hat{\omega})-
+\nu\Vert\mathbf{k}\Vert^2\hat{\omega}
 \end{equation}
 $$
 
