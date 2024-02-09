@@ -23,21 +23,17 @@ class App(ctk.CTk):
         # Nx
         self.NxLabel = ctk.CTkLabel(self.frame, text='Nₓ')
         self.NxLabel.grid(row=0, column=0, padx=10, pady=10, sticky='ew')
-        self.NxText = tk.StringVar(value=NVALS[0])
-        self.Nx = int(NVALS[0])
-        def update_Nx(_):
-            self.Nx = int(self.NxText.get())
-        self.NxBox = ctk.CTkComboBox(self.frame, values=NVALS, variable=self.NxText, command=update_Nx)
+        self.NxEntry = tk.StringVar(value=NVALS[0])
+        self.NxBox = ctk.CTkComboBox(self.frame, values=NVALS, variable=self.NxEntry)
+        self.NxBox.set(NVALS[0])
         self.NxBox.grid(row=0, column=1, columnspan=2, padx=10, pady=10, sticky='ew')
 
         # Ny
         self.NyLabel = ctk.CTkLabel(self.frame, text='Nᵧ')
         self.NyLabel.grid(row=0, column=3, padx=10, pady=10, sticky='ew')
-        self.NyText = tk.StringVar(value=NVALS[0])
-        self.Ny = int(NVALS[0])
-        def update_Ny(_):
-            self.Ny = int(self.NyText.get())
-        self.NyBox = ctk.CTkComboBox(self.frame, values=NVALS, variable=self.NyText, command=update_Ny)
+        self.NyEntry = tk.StringVar(value=NVALS[0])
+        self.NyBox = ctk.CTkComboBox(self.frame, values=NVALS, variable=self.NyEntry)
+        self.NyBox.set(NVALS[0])
         self.NyBox.grid(row=0, column=4, columnspan=2, padx=10, pady=10, sticky='ew')
 
         # Lx 
@@ -91,14 +87,14 @@ class App(ctk.CTk):
         self.w0Entry = ctk.CTkEntry(self.frame, 
                                    placeholder_text='Expected real NumPy (Ny, Nx) ndarray', 
                                    placeholder_text_color='red')
-        self.w0Entry.insert(0, 'np.sin(x)*np.sin(y)')
+        self.w0Entry.insert(0, 'np.cos(x)*np.cos(y)')
         self.w0Entry.grid(row=4, column=4, columnspan=2, padx=10, pady=10, sticky='ew')
 
         # Simulate Button
         def get_data():
             global Nx, Ny, Lx, Ly, t, dt, steps, nu, x, y, w0
-            Nx = self.Nx
-            Ny = self.Ny
+            Nx = int(self.NxEntry.get())
+            Ny = int(self.NyEntry.get())
             Lx = check_scalar(self.LxEntry)
             Ly = check_scalar(self.LyEntry)
             t = check_scalar(self.tEntry)
@@ -157,4 +153,4 @@ def setup():
     app = App()
     app.mainloop()
     app.destroy()
-    return Nx, Ny, Lx, Ly, t, dt, steps, nu, w0
+    return Nx, Ny, Lx, Ly, t, dt, steps, nu, x, y, w0
