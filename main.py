@@ -1,4 +1,3 @@
-import numpy as np
 import gui
 import animated_plot
 

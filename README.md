@@ -13,7 +13,7 @@ DISCLAIMER: This is an experiment on solving PDEs via Fourier Transform. This im
 1. Run the command `pip install -r requirements.txt` to install dependencies.
 1. Run the command `python main.py`.
 1. A GUI with some predefined values will open. Here you can modify the parameters of the simulation with Python and NumPy expressions. The number of grid points is controlled by `Nx` and `Ny`, the grid's side lengths `Lx` and `Ly` should evaluate to floats. Viscosity (`nu`), duration (`t`) and time step (`dt`) should also evaluate to floats. The vorticity field should evaluate to a real 2D NumPy $(N_y, N_x)$ array &mdash; you may use any of the simulation parameters as well as `x` and `y` to define it.
-<p align="center"> <img src="gui.png" align="center" width="300"/> </p>
+<p align="center"> <img src="gui.png" align="center" width="400"/> </p>
 5. Wait while the programme loads a Matplotlib window.
 
 ### COPYRIGHT
@@ -28,13 +28,11 @@ If need be, you can `cd` into the `fluid_sim` folder and run the following comma
 
 ### THEORY
 
-The incompressible Navier-Stokes equation, assuming linear stress, Stokes' hypothesis and constant kinematic viscosity reads:
+The incompressible Navier-Stokes equation reads:
 
 $$
-\begin{equation}
 \frac{\partial\boldsymbol{u}}{\partial t}+\boldsymbol{u}\cdot\nabla\boldsymbol{u}=
 -\frac{\nabla p}{\rho}+\boldsymbol{g}+\nu\nabla^2\boldsymbol{u}
-\end{equation}
 $$
 
 It is convenient to define the **vorticity** as $\boldsymbol{\omega}=\nabla\times\boldsymbol{u}$, more explicitly in 2D
@@ -43,12 +41,10 @@ $$
 \omega=\frac{\partial u_y}{\partial x}-\frac{\partial u_x}{\partial y}
 $$
 
-Taking the curl of Equation (1) in 2D then leads to the following, in terms of vorticity,
+Taking the curl of the NS equation in 2D then leads to the following, in terms of vorticity,
 
 $$
-\begin{equation}
 \frac{\partial\omega}{\partial t}+\boldsymbol{u}\cdot\nabla\omega=\nu\nabla^2\omega
-\end{equation}
 $$
 
 Since for an incompressible fluid $\nabla\cdot\boldsymbol{u}=0$, we may write that, in terms of a vector potential called the **stream function** $\boldsymbol{\psi}$, $\boldsymbol{u}=\nabla\times\boldsymbol{\psi}$. More simply in 2D 
@@ -60,12 +56,10 @@ u_y &= -\frac{\partial\psi}{\partial x}
 \end{align*}
 $$
 
-So we may rewrite Equation (2) as
+So we may rewrite the vorticity equation as
 
 $$
-\begin{equation}
 \frac{\partial\omega}{\partial t}=\left(\frac{\partial\psi}{\partial x}\frac{\partial}{\partial y}-\frac{\partial\psi}{\partial y}\frac{\partial}{\partial x}\right)\omega+\nu\nabla^2\omega
-\end{equation}
 $$
 
 And we find that one can recover $\psi$ from the Poisson equation 
@@ -74,7 +68,7 @@ $$
 \nabla^2\psi=-\omega
 $$
 
-In order to solve Equation (3) we must perform some numerical time integration. At each step we'll have to recalculate $\psi$. We still also need to figure out how to calculate spatial derivatives to solve the PDE, but notice that in Fourier space
+In order to solve the vorticity equation we must perform some numerical time integration. At each step we'll have to recalculate $\psi$. We still also need to figure out how to calculate spatial derivatives to solve the PDE, but notice that in Fourier space
 
 $$
 \mathscr{F}_x\left(\frac{\partial^k\cdot}{\partial x^k}\right) \rightarrow (ik_x)^k\mathscr{F}_x(\cdot)
@@ -88,15 +82,15 @@ If the simulation is on a $L_x\times L_y$ grid of $N_x\times N_y$ points, we may
 
 $$
 \begin{align*}
-k_{x_i} &= \frac{2\pi i}{L_x}\ \ \ \ \ \ \ &
-i &=0,1,...,\frac{N_x}{2}-1,-\frac{N_x}{2},...,-2,-1
+k_x &= \frac{2\pi i_x}{L_x}\ \ \ \ \ \ \ &
+i_x &=0,1,...,\frac{N_x}{2}-1,-\frac{N_x}{2},...,-2,-1
 \end{align*}
 $$
 
 $$
 \begin{align*}
-k_{y_j} &= \frac{2\pi j}{L_y}\ \ \ \ \ \ \ &
-j &=0,1,...,\frac{N_y}{2}-1,-\frac{N_y}{2},...,-2,-1
+k_y &= \frac{2\pi i_y}{L_y}\ \ \ \ \ \ \ &
+i_y &=0,1,...,\frac{N_y}{2}-1,-\frac{N_y}{2},...,-2,-1
 \end{align*}
 $$
 
@@ -108,32 +102,23 @@ $$
 
 Denoting by $\ \hat{}$ ${}$ the 2D Fourier transform in x and y and by $*$ the 2D convolution, the equation to solve then becomes
 
-<p align="center"> <img src="equation.png" align="center" width="5000"/> </p>
-<!---
 $$
-\begin{equation}
-    \frac{\partial\hat{\omega}}{\partial t} = 
-    \left(\frac{k_y}{\Vert\mathbf{k}\Vert^2}\hat{\omega}\right)*(k_x\hat{\omega})-
-    \left(\frac{k_x}{\Vert\mathbf{k}\Vert^2}\hat{\omega}\right)*(k_y\hat{\omega} )-
-    \nu\Vert\mathbf{k}\Vert^2\hat{\omega}
-\end{equation}
+\frac{\partial\hat{\omega}}{\partial t} = 
+\left(\frac{k_y}{\Vert\mathbf{k}\Vert^2}\hat{\omega}\right)*(k_x\hat{\omega})-
+\left(\frac{k_x}{\Vert\mathbf{k}\Vert^2}\hat{\omega}\right)*(k_y\hat{\omega} )-
+\nu\Vert\mathbf{k}\Vert^2\hat{\omega}
 $$
---->
 
 So far this naive implementation could suffer from **aliasing** in the nonlinear convection term of the RHS (the one with convolutions). When performing a discrete Fourier transform, too high frequencies could be treated as low frequencies. To solve this we pad all arrays with zeros, perform the operations on $3/2N$ points, and truncate the result back to $N$ points.
 
 For brevity, let's denote the nonlinear convection term by $\mathcal{N}(\hat{\omega})$. We can "pull out" the linear part of the PDE using an integrating factor.
 
 $$
-\begin{equation}
 \frac{\partial}{\partial t}(\hat{\omega}e^{\nu\Vert\mathbf{k}\Vert^2t})= e^{\nu\Vert\mathbf{k}\Vert^2t}\mathcal{N}(\hat{\omega})
-\end{equation}
 $$
 
 And if we approximate the nonlinear part as constant over each time step we end up with the simplest **exponential time-differencing** scheme:
 
 $$
-\begin{equation}
 \hat{\omega}_{n+1} \approx e^{-\nu\Vert\mathbf{k}\Vert^2\Delta t}\hat{\omega}_n - \frac{e^{-\nu\Vert\mathbf{k}\Vert^2\Delta t}-1}{\nu\Vert\mathbf{k}\Vert^2}\mathcal{N}(\hat{\omega}_n)
-\end{equation}
 $$
