@@ -60,7 +60,7 @@ class App(ctk.CTk):
         self.tEntry = ctk.CTkEntry(self.frame, 
                               placeholder_text='Expected positive float', 
                               placeholder_text_color='red')
-        self.tEntry.insert(0, '20')
+        self.tEntry.insert(0, '10')
         self.tEntry.grid(row=3, column=1, columnspan=2, padx=10, pady=10, sticky='ew')
 
         # dt 
@@ -78,7 +78,7 @@ class App(ctk.CTk):
         self.nuEntry = ctk.CTkEntry(self.frame, 
                               placeholder_text='Expected float', 
                               placeholder_text_color='red')
-        self.nuEntry.insert(0, '1')
+        self.nuEntry.insert(0, '0.1')
         self.nuEntry.grid(row=4, column=1, columnspan=2, padx=10, pady=10, sticky='ew')
 
         # w0

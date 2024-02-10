@@ -102,7 +102,7 @@ $$
 
 Denoting by $\ \hat{}$ ${}$ the 2D Fourier transform in x and y and by $*$ the 2D convolution, the equation to solve then becomes
 
-<p align="center"> <img src="equation.png" align="center" width="430"/> </p>
+<p align="center"> <img src="equation.png" align="center" width="400"/> </p>
 <!---
 $$
 \frac{\partial\hat{\omega}}{\partial t} = 
@@ -125,3 +125,5 @@ And if we approximate the nonlinear part as constant over each time step we end 
 $$
 \hat{\omega}_{n+1} \approx e^{-\nu\Vert\mathbf{k}\Vert^2\Delta t}\hat{\omega}_n - \frac{e^{-\nu\Vert\mathbf{k}\Vert^2\Delta t}-1}{\nu\Vert\mathbf{k}\Vert^2}\mathcal{N}(\hat{\omega}_n)
 $$
+
+The function in front of $\mathcal{N}(\hat{\omega}_n)$ is numerically problematic, so for small values of $\nu\Vert\mathbf{k}\Vert^2\Delta t$ it will be evaluated via Padé approximant.
