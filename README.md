@@ -1,11 +1,12 @@
 # fluid_sim_2d
 
 ### ABOUT
-WIP: A 2D simulation of an incompressible, viscous fluid built with Fortran90, wrapped with Python 3.11 via gfort2py.
+A 2D simulation of an incompressible, viscous fluid built with Fortran90, wrapped with Python 3.11 via gfort2py.
 
 DISCLAIMER: This is an experiment on solving PDEs via Fourier Transform. This implies the simulation only works with periodic boundary conditions and is subject to the Gibbs phenomenon. In future simulations I plan on using Chebyshev transforms.
 
 ### PREVIEW
+![](preview.gif)
 
 ### HOW TO USE
 

@@ -39,5 +39,7 @@ def animate(x, y, w, dt):
         for child in cont.collections:
             child.remove()
         cont = plt.contourf(x, y, w_d[i], vmin=vmin, vmax=vmax)
-    ani = animation.FuncAnimation(fig, func, init_func=init_func, frames=int(w_d.shape[0]), interval=INTERVAL)
+    ani = animation.FuncAnimation(fig, func, init_func=init_func, 
+                                  frames=int(w_d.shape[0]), interval=INTERVAL, repeat=False)
+    #ani.save('preview.gif', fps=FPS)
     plt.show()
