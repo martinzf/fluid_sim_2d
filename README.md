@@ -11,11 +11,12 @@ DISCLAIMER: This is an experiment on solving PDEs via Fourier Transform. This im
 ### HOW TO USE
 
 1. Clone the repository and open its folder from the CLI.
+1. Create a virtual environment with the commands `python -m venv venv` followed by `venv/Scripts/activate`.
 1. Run the command `pip install -r requirements.txt` to install dependencies.
 1. Run the command `python main.py`.
 1. A GUI with some predefined values will open. Here you can modify the parameters of the simulation with Python and NumPy expressions. The number of grid points is controlled by `Nx` and `Ny`, the grid's side lengths `Lx` and `Ly` should evaluate to floats. Viscosity (`nu`), duration (`t`) and time step (`dt`) should also evaluate to floats. The vorticity field should evaluate to a real 2D NumPy $(N_y, N_x)$ array &mdash; you may use any of the simulation parameters as well as `x` and `y` to define it.
 <p align="center"> <img src="gui.png" align="center" width="400"/> </p>
-5. Wait while the programme loads a Matplotlib window.
+6. Wait while the programme loads a Matplotlib window.
 
 ### COPYRIGHT
 
