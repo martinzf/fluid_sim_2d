@@ -5,7 +5,6 @@ plt.style.use('fast')
 
 # Animation time resolution
 FPS = 40
-INTERVAL = 1e3 / FPS
 
 def init(x, y, vmin, vmax):
     plt.title('Vorticity simulation')
@@ -23,15 +22,17 @@ def init(x, y, vmin, vmax):
         child.remove()
 
 def downsampling(w, dt):
-    if 1e3 * dt < INTERVAL:
-        indices = np.arange(0, w.shape[0], INTERVAL/(1e3*dt)).round(decimals=0).astype(int)
-        return w[indices]
-    return w
+    if dt < 1 / FPS:
+        indices = np.arange(0, w.shape[0], 1/(FPS*dt)).round(decimals=0).astype(int)
+        return w[indices], 1e3 / FPS
+    elif dt > 1 / FPS:
+        return w, 1e3 * dt
+    return w, 1e3 / FPS
 
 fig = plt.figure('Simulation', figsize=(7, 6))
 cont = plt.contourf(np.empty((2, 2)), np.empty((2, 2)), np.empty((2, 2)))
 def animate(x, y, w, dt):
-    w_d = downsampling(w, dt)
+    w_d, interval = downsampling(w, dt)
     vmin, vmax = np.min(w_d), np.max(w_d)
     init_func = lambda : init(x, y, vmin, vmax)
     def func(i):
@@ -40,6 +41,6 @@ def animate(x, y, w, dt):
             child.remove()
         cont = plt.contourf(x, y, w_d[i], vmin=vmin, vmax=vmax)
     ani = animation.FuncAnimation(fig, func, init_func=init_func, 
-                                  frames=int(w_d.shape[0]), interval=INTERVAL, repeat=False)
+                                  frames=int(w_d.shape[0]), interval=interval, repeat=False)
     #ani.save('preview.gif', fps=FPS)
     plt.show()
