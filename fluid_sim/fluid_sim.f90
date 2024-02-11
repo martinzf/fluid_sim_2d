@@ -4,7 +4,7 @@ module fluid_sim
     include 'fftw3.f03'
 
     public :: vort_solve
-    private :: meshgrid, step, ETD_func, nonlinear
+    private :: meshgrid, step, ETD_func, nonlinear, pad
 
     contains
 
@@ -101,8 +101,8 @@ module fluid_sim
         do i = 1, size(x, 1)
             do j = 1, size(x, 2)
                 ! Padé approximant
-                if (abs(x(i, j)) < 1) then 
-                    x_powers = [(x(i, j)**k, k = 0, 6)]
+                if (abs(a * x(i, j)) < 1) then 
+                    x_powers = [((a * x(i, j))**k, k = 0, 6)]
                     pval_p = sum(p * x_powers)
                     pval_q = sum(q * x_powers)
                     phi1(i, j) = a * pval_p / pval_q
