@@ -91,9 +91,9 @@ module fluid_sim
         double precision :: x(:, :), a
         double precision :: phi1(size(x, 1), size(x, 2))
         double precision, dimension(7), parameter :: &
-        p = (/1.d0, 1.d0/26, 5.d0/156, 1.d0/858, 1.d0/5720, 1.d0/205920, 1.d0/8648640/)
+        p = (/1.d0, 1.d0/26.d0, 5.d0/156.d0, 1.d0/858.d0, 1.d0/5720.d0, 1.d0/205920.d0, 1.d0/8648640.d0/)
         double precision, dimension(7), parameter :: &
-        q = (/1.d0, -6.d0/13, 5.d0/52, -5.d0/429, 1.d0/1144, -1.d0/25740, 1.d0/1235520/)
+        q = (/1.d0, -6.d0/13.d0, 5.d0/52.d0, -5.d0/429.d0, 1.d0/1144.d0, -1.d0/25740.d0, 1.d0/1235520.d0/)
         double precision :: pval_p, pval_q
         double precision :: x_powers(7)
         integer :: i, j, k

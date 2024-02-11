@@ -1,6 +1,8 @@
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import animation
+matplotlib.use('Qt5Agg')
 plt.style.use('fast')
 
 # Animation time resolution
@@ -41,6 +43,5 @@ def animate(x, y, w, dt):
             child.remove()
         cont = plt.contourf(x, y, w_d[i], vmin=vmin, vmax=vmax)
     ani = animation.FuncAnimation(fig, func, init_func=init_func, 
-                                  frames=int(w_d.shape[0]), interval=interval, repeat=False)
-    #ani.save('preview.gif', fps=FPS)
+                                  frames=w_d.shape[0], interval=interval, repeat=False)
     plt.show()
