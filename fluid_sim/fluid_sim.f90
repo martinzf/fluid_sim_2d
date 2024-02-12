@@ -4,7 +4,7 @@ module fluid_sim
     include 'fftw3.f03'
 
     public :: vort_solve
-    private :: meshgrid, step, ETD_func, nonlinear, pad
+    private :: alloc_real, alloc_complex, meshgrid, step, ETD_func, nonlinear, pad
 
     ! FFT plans
     type(C_PTR) :: forward, backward, forward_padded, backward_padded 
@@ -37,34 +37,20 @@ module fluid_sim
         ! Allocate FFT memory
         type(C_PTR) :: p_w, p_w_hat ! Pointers
         type(C_PTR) :: p_A_hat, p_B_hat, p_C_hat, p_D_hat, p_A, p_B, p_C, p_D, p_x, p_y, p_conv1, p_conv2
-        p_w     =    fftw_alloc_real(int(Ny         * Nx      , C_SIZE_T)) 
-        p_w_hat = fftw_alloc_complex(int((Ny/2+1)   * Nx      , C_SIZE_T)) 
-        p_A_hat = fftw_alloc_complex(int((3*Ny/4+1) * (3*Nx/2), C_SIZE_T))
-        p_B_hat = fftw_alloc_complex(int((3*Ny/4+1) * (3*Nx/2), C_SIZE_T))
-        p_C_hat = fftw_alloc_complex(int((3*Ny/4+1) * (3*Nx/2), C_SIZE_T))
-        p_D_hat = fftw_alloc_complex(int((3*Ny/4+1) * (3*Nx/2), C_SIZE_T))
-        p_A     =    fftw_alloc_real(int((3*Ny/2)   * (3*Nx/2), C_SIZE_T))
-        p_B     =    fftw_alloc_real(int((3*Ny/2)   * (3*Nx/2), C_SIZE_T))
-        p_C     =    fftw_alloc_real(int((3*Ny/2)   * (3*Nx/2), C_SIZE_T))
-        p_D     =    fftw_alloc_real(int((3*Ny/2)   * (3*Nx/2), C_SIZE_T))
-        p_x     =    fftw_alloc_real(int((3*Ny/2)   * (3*Nx/2), C_SIZE_T))
-        p_y     =    fftw_alloc_real(int((3*Ny/2)   * (3*Nx/2), C_SIZE_T))
-        p_conv1 = fftw_alloc_complex(int((3*Ny/4+1) * (3*Nx/2), C_SIZE_T))
-        p_conv2 = fftw_alloc_complex(int((3*Ny/4+1) * (3*Nx/2), C_SIZE_T))
-        call c_f_pointer(p_w    , w    , [Ny      , Nx    ])
-        call c_f_pointer(p_w_hat, w_hat, [Ny/2+1  , Nx    ])
-        call c_f_pointer(p_A_hat, A_hat, [3*Ny/4+1, 3*Nx/2])
-        call c_f_pointer(p_B_hat, B_hat, [3*Ny/4+1, 3*Nx/2])
-        call c_f_pointer(p_C_hat, C_hat, [3*Ny/4+1, 3*Nx/2])
-        call c_f_pointer(p_D_hat, D_hat, [3*Ny/4+1, 3*Nx/2])
-        call c_f_pointer(p_A    , A    , [3*Ny/2  , 3*Nx/2])
-        call c_f_pointer(p_B    , B    , [3*Ny/2  , 3*Nx/2])
-        call c_f_pointer(p_C    , C    , [3*Ny/2  , 3*Nx/2])
-        call c_f_pointer(p_D    , D    , [3*Ny/2  , 3*Nx/2])
-        call c_f_pointer(p_x    , x    , [3*Ny/2  , 3*Nx/2])
-        call c_f_pointer(p_y    , y    , [3*Ny/2  , 3*Nx/2])
-        call c_f_pointer(p_conv1, conv1, [3*Ny/4+1, 3*Nx/2])
-        call c_f_pointer(p_conv2, conv2, [3*Ny/4+1, 3*Nx/2])
+        call alloc_real(w, p_w, Ny, Nx)
+        call alloc_complex(w_hat, p_w_hat, Ny, Nx)
+        call alloc_complex(A_hat, p_A_hat, 3*Ny/2, 3*Nx/2)
+        call alloc_complex(B_hat, p_B_hat, 3*Ny/2, 3*Nx/2)
+        call alloc_complex(C_hat, p_C_hat, 3*Ny/2, 3*Nx/2)
+        call alloc_complex(D_hat, p_D_hat, 3*Ny/2, 3*Nx/2)
+        call alloc_real(A, p_A, 3*Ny/2, 3*Nx/2)
+        call alloc_real(B, p_B, 3*Ny/2, 3*Nx/2)
+        call alloc_real(C, p_C, 3*Ny/2, 3*Nx/2)
+        call alloc_real(D, p_D, 3*Ny/2, 3*Nx/2)
+        call alloc_real(x, p_x, 3*Ny/2, 3*Nx/2)
+        call alloc_real(y, p_y, 3*Ny/2, 3*Nx/2)
+        call alloc_complex(conv1, p_conv1, 3*Ny/2, 3*Nx/2)
+        call alloc_complex(conv2, p_conv2, 3*Ny/2, 3*Nx/2)
         ! Create Fourier transform plans
         forward         = fftw_plan_dft_r2c_2d(Nx    , Ny    , w, w_hat, FFTW_ESTIMATE)
         backward        = fftw_plan_dft_c2r_2d(Nx    , Ny    , w_hat, w, FFTW_ESTIMATE)
@@ -98,27 +84,49 @@ module fluid_sim
         call fftw_destroy_plan(forward_padded)
         call fftw_destroy_plan(backward_padded)
         ! Release FFT variables memory
-        call fftw_free(p_w    )
+        call fftw_free(p_w)
         call fftw_free(p_w_hat)
         call fftw_free(p_A_hat)
         call fftw_free(p_B_hat)
         call fftw_free(p_C_hat)
         call fftw_free(p_D_hat)
-        call fftw_free(p_A    )
-        call fftw_free(p_B    )
-        call fftw_free(p_C    )
-        call fftw_free(p_D    )
-        call fftw_free(p_x    )
-        call fftw_free(p_y    )
+        call fftw_free(p_A)
+        call fftw_free(p_B)
+        call fftw_free(p_C)
+        call fftw_free(p_D)
+        call fftw_free(p_x)
+        call fftw_free(p_y)
         call fftw_free(p_conv1)
         call fftw_free(p_conv2)
 
     end function vort_solve
 
+    ! Allocating memory of real array
+    subroutine alloc_real(var, p_var, L, M)
+        real(C_DOUBLE), pointer, intent(out) :: var(:, :)
+        type(C_PTR), intent(out) :: p_var
+        integer, intent(in) :: L, M
+
+        p_var =  fftw_alloc_real(int(L * M, C_SIZE_T))
+        call c_f_pointer(p_var, var, [L, M])
+        
+    end subroutine alloc_real
+
+    ! Allocating memory of complex array
+    subroutine alloc_complex(var, p_var, L, M)
+        complex(C_DOUBLE_COMPLEX), pointer, intent(out) :: var(:, :)
+        type(C_PTR), intent(out) :: p_var
+        integer, intent(in) :: L, M
+
+        p_var =  fftw_alloc_complex(int((L/2 + 1) * M, C_SIZE_T))
+        call c_f_pointer(p_var, var, [L/2 + 1, M])
+        
+    end subroutine alloc_complex
+
     ! 2D meshgrid of 1D arrays
     subroutine meshgrid(x, y, Xg, Yg)
-        double precision :: x(:), y(:)
-        double precision :: Xg(size(y), size(x)), Yg(size(y), size(x))
+        double precision, intent(in) :: x(:), y(:)
+        double precision, intent(out) :: Xg(size(y), size(x)), Yg(size(y), size(x))
         integer :: i, j
 
         ! Generating meshgrid
@@ -133,8 +141,9 @@ module fluid_sim
 
     ! Single time step as per ETD scheme
     subroutine step(Nx, Ny, kx, ky, k2, nu, dt)
-        integer :: Nx, Ny
-        double precision :: kx(:, :), ky(:, :), k2(:, :), nu, dt
+        integer, intent(in) :: Nx, Ny
+        double precision, intent(in) :: kx(:, :), ky(:, :), nu, dt
+        double precision, intent(inout) :: k2(:, :)
 
         w_hat = exp(-nu * k2 * dt) * w_hat + &
                 ETD_func(-nu * k2, dt) * nonlinear(Nx, Ny, kx, ky, k2)
@@ -143,21 +152,22 @@ module fluid_sim
 
     ! Numerically problematic function in ETD scheme
     function ETD_func(x, a) result(phi1)
-        double precision :: x(:, :), a
+        double precision, intent(in) :: x(:, :), a
         double precision :: phi1(size(x, 1), size(x, 2))
-        double precision, dimension(7), parameter :: &
+        integer, parameter :: n_terms = 7
+        double precision, dimension(n_terms), parameter :: &
         p = (/1.d0, 1.d0/26.d0, 5.d0/156.d0, 1.d0/858.d0, 1.d0/5720.d0, 1.d0/205920.d0, 1.d0/8648640.d0/)
-        double precision, dimension(7), parameter :: &
+        double precision, dimension(n_terms), parameter :: &
         q = (/1.d0, -6.d0/13.d0, 5.d0/52.d0, -5.d0/429.d0, 1.d0/1144.d0, -1.d0/25740.d0, 1.d0/1235520.d0/)
         double precision :: pval_p, pval_q
-        double precision :: x_powers(7)
+        double precision :: x_powers(n_terms)
         integer :: i, j, k
 
         do i = 1, size(x, 1)
             do j = 1, size(x, 2)
                 ! Padé approximant
                 if (abs(a * x(i, j)) < 1) then 
-                    x_powers = [((a * x(i, j))**k, k = 0, 6)]
+                    x_powers = [((a * x(i, j))**k, k = 0, n_terms-1)]
                     pval_p = sum(p * x_powers)
                     pval_q = sum(q * x_powers)
                     phi1(i, j) = a * pval_p / pval_q
@@ -172,8 +182,9 @@ module fluid_sim
 
     ! Nonlinear term of the PDE
     function nonlinear(Nx, Ny, kx, ky, k2) result(N)
-        integer :: Nx, Ny
-        double precision :: kx(:, :), ky(:, :), k2(:, :)
+        integer, intent(in) :: Nx, Ny
+        double precision, intent(in) :: kx(:, :), ky(:, :)
+        double precision, intent(inout) :: k2(:, :)
         double complex :: N(Ny/2+1, Nx)
 
         ! CONVOLUTIONS
@@ -183,6 +194,7 @@ module fluid_sim
         B_hat = pad(kx * w_hat     , Nx, Ny)
         C_hat = pad(kx * w_hat / k2, Nx, Ny)
         D_hat = pad(ky * w_hat     , Nx, Ny)
+        k2(1, 1) = 0.d0 ! Restore value
         call fftw_execute_dft_c2r(backward_padded, A_hat, A)
         call fftw_execute_dft_c2r(backward_padded, B_hat, B)
         call fftw_execute_dft_c2r(backward_padded, C_hat, C)
@@ -204,8 +216,8 @@ module fluid_sim
 
     ! Zero padding arrays for dealiasing
     function pad(arr, Nx, Ny) result(arr_padded)
-        double complex :: arr(:, :)
-        integer :: Nx, Ny
+        double complex, intent(in) :: arr(:, :)
+        integer, intent(in) :: Nx, Ny
         double complex :: arr_padded(3*Ny/4+1, 3*Nx/2)
 
         arr_padded(1:Ny/2+1, 1:Nx/2) = arr(:, 1:Nx/2)
