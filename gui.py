@@ -2,7 +2,7 @@ import numpy as np
 import tkinter as tk
 import customtkinter as ctk
 
-NVALS = ['256', '512', '1024']
+NVALS = ['128', '256', '512']
 WIDTH, HEIGHT = 550, 300 # pixels
 
 class App(ctk.CTk):
