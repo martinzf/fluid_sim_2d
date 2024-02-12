@@ -25,7 +25,9 @@ module fluid_sim
         integer, intent(in) :: Nx, Ny, steps
         double precision, intent(in) :: Lx, Ly, nu, dt
         double precision, intent(in) :: w0(Ny, Nx)
+        ! Arrays for copying results
         double precision :: w_cum(steps, Ny, Nx)
+        double complex :: w_hat_copy(Ny/2+1, Nx)
         ! Wavenumbers
         integer :: ix(Nx), iy(Ny/2+1)
         double precision :: kx(Nx), ky(Ny/2+1)
@@ -52,10 +54,10 @@ module fluid_sim
         call alloc_complex(conv1, p_conv1, 3*Ny/2, 3*Nx/2)
         call alloc_complex(conv2, p_conv2, 3*Ny/2, 3*Nx/2)
         ! Create Fourier transform plans
-        forward         = fftw_plan_dft_r2c_2d(Nx    , Ny    , w, w_hat, FFTW_ESTIMATE)
-        backward        = fftw_plan_dft_c2r_2d(Nx    , Ny    , w_hat, w, FFTW_ESTIMATE)
-        forward_padded  = fftw_plan_dft_r2c_2d(3*Nx/2, 3*Ny/2, A, A_hat, FFTW_ESTIMATE)
-        backward_padded = fftw_plan_dft_c2r_2d(3*Nx/2, 3*Ny/2, A_hat, A, FFTW_ESTIMATE)
+        forward         = fftw_plan_dft_r2c_2d(Nx    , Ny    , w, w_hat, ior(FFTW_MEASURE, FFTW_DESTROY_INPUT))
+        backward        = fftw_plan_dft_c2r_2d(Nx    , Ny    , w_hat, w, ior(FFTW_MEASURE, FFTW_DESTROY_INPUT))
+        forward_padded  = fftw_plan_dft_r2c_2d(3*Nx/2, 3*Ny/2, A, A_hat, ior(FFTW_MEASURE, FFTW_DESTROY_INPUT))
+        backward_padded = fftw_plan_dft_c2r_2d(3*Nx/2, 3*Ny/2, A_hat, A, ior(FFTW_MEASURE, FFTW_DESTROY_INPUT))
 
         ! SET UP WAVE VECTORS
         ix(:Nx/2+1) = [(i, i = 0, Nx/2)]
@@ -69,9 +71,11 @@ module fluid_sim
         ! INTEGRATION LOOP
         w = w0
         w_cum(1, :, :) = w
+        call fftw_execute_dft_r2c(forward, w, w_hat)
+        w_hat_copy = w_hat
         do i = 2, steps
-            call fftw_execute_dft_r2c(forward, w, w_hat)
-            call step(Nx, Ny, Kxg, Kyg, K2, nu, dt)
+            call step(w_hat_copy, Nx, Ny, Kxg, Kyg, K2, nu, dt)
+            w_hat = w_hat_copy
             call fftw_execute_dft_c2r(backward, w_hat, w)
             w = w / (Nx * Ny) ! Normalisation
             w_cum(i, :, :) = w
@@ -140,13 +144,14 @@ module fluid_sim
     end subroutine meshgrid
 
     ! Single time step as per ETD scheme
-    subroutine step(Nx, Ny, kx, ky, k2, nu, dt)
+    subroutine step(w_hat, Nx, Ny, kx, ky, k2, nu, dt)
+        double complex, intent(inout) :: w_hat(:, :)
         integer, intent(in) :: Nx, Ny
         double precision, intent(in) :: kx(:, :), ky(:, :), nu, dt
         double precision, intent(inout) :: k2(:, :)
 
         w_hat = exp(-nu * k2 * dt) * w_hat + &
-                ETD_func(-nu * k2, dt) * nonlinear(Nx, Ny, kx, ky, k2)
+                ETD_func(-nu * k2, dt) * nonlinear(w_hat, Nx, Ny, kx, ky, k2)
 
     end subroutine step
 
@@ -181,7 +186,8 @@ module fluid_sim
     end function ETD_func
 
     ! Nonlinear term of the PDE
-    function nonlinear(Nx, Ny, kx, ky, k2) result(N)
+    function nonlinear(w_hat, Nx, Ny, kx, ky, k2) result(N)
+        double complex, intent(in) :: w_hat(:, :)
         integer, intent(in) :: Nx, Ny
         double precision, intent(in) :: kx(:, :), ky(:, :)
         double precision, intent(inout) :: k2(:, :)
