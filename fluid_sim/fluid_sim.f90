@@ -145,10 +145,10 @@ module fluid_sim
 
     ! Single time step as per ETD scheme
     subroutine step(w_hat, Nx, Ny, kx, ky, k2, nu, dt)
-        double complex, intent(inout) :: w_hat(:, :)
         integer, intent(in) :: Nx, Ny
-        double precision, intent(in) :: kx(:, :), ky(:, :), nu, dt
-        double precision, intent(inout) :: k2(:, :)
+        double complex, intent(inout) :: w_hat(Ny/2+1, Nx)
+        double precision, intent(in) :: kx(Ny/2+1, Nx), ky(Ny/2+1, Nx), nu, dt
+        double precision, intent(inout) :: k2(Ny/2+1, Nx)
 
         w_hat = exp(-nu * k2 * dt) * w_hat + &
                 ETD_func(-nu * k2, dt) * nonlinear(w_hat, Nx, Ny, kx, ky, k2)
@@ -187,10 +187,10 @@ module fluid_sim
 
     ! Nonlinear term of the PDE
     function nonlinear(w_hat, Nx, Ny, kx, ky, k2) result(N)
-        double complex, intent(in) :: w_hat(:, :)
+        double complex, intent(in) :: w_hat(Ny/2+1, Nx)
         integer, intent(in) :: Nx, Ny
-        double precision, intent(in) :: kx(:, :), ky(:, :)
-        double precision, intent(inout) :: k2(:, :)
+        double precision, intent(in) :: kx(Ny/2+1, Nx), ky(Ny/2+1, Nx)
+        double precision, intent(inout) :: k2(Ny/2+1, Nx)
         double complex :: N(Ny/2+1, Nx)
 
         ! CONVOLUTIONS
@@ -222,8 +222,8 @@ module fluid_sim
 
     ! Zero padding arrays for dealiasing
     function pad(arr, Nx, Ny) result(arr_padded)
-        double complex, intent(in) :: arr(:, :)
         integer, intent(in) :: Nx, Ny
+        double complex, intent(in) :: arr(Ny/2+1, Nx)
         double complex :: arr_padded(3*Ny/4+1, 3*Nx/2)
 
         arr_padded(1:Ny/2+1, 1:Nx/2) = arr(:, 1:Nx/2)
