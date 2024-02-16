@@ -6,8 +6,6 @@ module fluid_sim
     public :: vort_solve
     private :: alloc_real, alloc_complex, meshgrid, step, ETD_func, nonlinear, pad
 
-    ! FFT plans
-    type(C_PTR) :: forward, backward, forward_padded, backward_padded 
     ! FFT variables
     real(C_DOUBLE), pointer :: w(:, :)
     complex(C_DOUBLE_COMPLEX), pointer :: w_hat(:, :)
@@ -17,11 +15,15 @@ module fluid_sim
     real(C_DOUBLE), pointer :: C(:, :), D(:, :)
     real(C_DOUBLE), pointer :: x(:, :), y(:, :)
     complex(C_DOUBLE_COMPLEX), pointer :: conv1(:, :), conv2(:, :)
+    ! Pointers
+    type(C_PTR) :: p_w, p_w_hat
+    type(C_PTR) :: p_A_hat, p_B_hat, p_C_hat, p_D_hat, p_A, p_B, p_C, p_D, p_x, p_y, p_conv1, p_conv2
+    ! FFT plans
+    type(C_PTR) :: forward, backward, forward_padded, backward_padded 
 
     contains
 
     function vort_solve(Nx, Ny, Lx, Ly, nu, dt, steps, w0) result(w_cum)
-        double precision, parameter :: pi = 4.d0 * atan(1.d0)
         integer, intent(in) :: Nx, Ny, steps
         double precision, intent(in) :: Lx, Ly, nu, dt
         double precision, intent(in) :: w0(Ny, Nx)
@@ -34,11 +36,11 @@ module fluid_sim
         double precision :: Kxg(Ny/2+1, Nx), Kyg(Ny/2+1, Nx), K2(Ny/2+1, Nx)
         ! Indexing
         integer :: i
+        ! Pi
+        double precision, parameter :: pi = 4.d0 * atan(1.d0)
 
         ! SET UP FOURIER TRANSFORMS
         ! Allocate FFT memory
-        type(C_PTR) :: p_w, p_w_hat ! Pointers
-        type(C_PTR) :: p_A_hat, p_B_hat, p_C_hat, p_D_hat, p_A, p_B, p_C, p_D, p_x, p_y, p_conv1, p_conv2
         call alloc_real(w, p_w, Ny, Nx)
         call alloc_complex(w_hat, p_w_hat, Ny, Nx)
         call alloc_complex(A_hat, p_A_hat, 3*Ny/2, 3*Nx/2)

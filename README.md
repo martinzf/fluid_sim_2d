@@ -26,7 +26,7 @@ This project makes use of the FFTW library, retrieved from https://www.fftw.org/
 
 If need be, you can `cd` into the `fluid_sim` folder and run the following command to recompile the Fortran code, provided you have gfortran installed:
 
-`gfortran fluid_sim.f90 -o fluid_sim.mod -o fluid_sim.dll -shared -L../ -lfftw3-3` 
+`gfortran fluid_sim.f90 -O3 -o fluid_sim.dll -shared -L../ -lfftw3-3` 
 
 ### THEORY
 
