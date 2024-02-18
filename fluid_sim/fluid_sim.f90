@@ -8,7 +8,7 @@ module fluid_sim
 
     ! FFT variables
     real(C_DOUBLE), pointer :: w(:, :)
-    complex(C_DOUBLE_COMPLEX), pointer :: w_hat(:, :)
+    complex(C_DOUBLE_COMPLEX), pointer :: w_hat_copy(:, :)
     complex(C_DOUBLE_COMPLEX), pointer :: A_hat(:, :), B_hat(:, :)
     complex(C_DOUBLE_COMPLEX), pointer :: C_hat(:, :), D_hat(:, :)
     real(C_DOUBLE), pointer :: A(:, :), B(:, :)
@@ -16,7 +16,7 @@ module fluid_sim
     real(C_DOUBLE), pointer :: x(:, :), y(:, :)
     complex(C_DOUBLE_COMPLEX), pointer :: conv1(:, :), conv2(:, :)
     ! Pointers
-    type(C_PTR) :: p_w, p_w_hat
+    type(C_PTR) :: p_w, p_w_hat_copy
     type(C_PTR) :: p_A_hat, p_B_hat, p_C_hat, p_D_hat, p_A, p_B, p_C, p_D, p_x, p_y, p_conv1, p_conv2
     ! FFT plans
     type(C_PTR) :: forward, backward, forward_padded, backward_padded 
@@ -29,7 +29,7 @@ module fluid_sim
         double precision, intent(in) :: w0(Ny, Nx)
         ! Arrays for copying results
         double precision :: w_cum(steps, Ny, Nx)
-        double complex :: w_hat_copy(Ny/2+1, Nx)
+        double complex :: w_hat(Ny/2+1, Nx)
         ! Wavenumbers
         integer :: ix(Nx), iy(Ny/2+1)
         double precision :: kx(Nx), ky(Ny/2+1)
@@ -42,7 +42,7 @@ module fluid_sim
         ! SET UP FOURIER TRANSFORMS
         ! Allocate FFT memory
         call alloc_real(w, p_w, Ny, Nx)
-        call alloc_complex(w_hat, p_w_hat, Ny, Nx)
+        call alloc_complex(w_hat_copy, p_w_hat_copy, Ny, Nx)
         call alloc_complex(A_hat, p_A_hat, 3*Ny/2, 3*Nx/2)
         call alloc_complex(B_hat, p_B_hat, 3*Ny/2, 3*Nx/2)
         call alloc_complex(C_hat, p_C_hat, 3*Ny/2, 3*Nx/2)
@@ -56,8 +56,8 @@ module fluid_sim
         call alloc_complex(conv1, p_conv1, 3*Ny/2, 3*Nx/2)
         call alloc_complex(conv2, p_conv2, 3*Ny/2, 3*Nx/2)
         ! Create Fourier transform plans
-        forward         = fftw_plan_dft_r2c_2d(Nx    , Ny    , w, w_hat, ior(FFTW_MEASURE, FFTW_DESTROY_INPUT))
-        backward        = fftw_plan_dft_c2r_2d(Nx    , Ny    , w_hat, w, ior(FFTW_MEASURE, FFTW_DESTROY_INPUT))
+        forward         = fftw_plan_dft_r2c_2d(Nx, Ny, w, w_hat_copy, ior(FFTW_MEASURE, FFTW_DESTROY_INPUT))
+        backward        = fftw_plan_dft_c2r_2d(Nx, Ny, w_hat_copy, w, ior(FFTW_MEASURE, FFTW_DESTROY_INPUT))
         forward_padded  = fftw_plan_dft_r2c_2d(3*Nx/2, 3*Ny/2, A, A_hat, ior(FFTW_MEASURE, FFTW_DESTROY_INPUT))
         backward_padded = fftw_plan_dft_c2r_2d(3*Nx/2, 3*Ny/2, A_hat, A, ior(FFTW_MEASURE, FFTW_DESTROY_INPUT))
 
@@ -73,12 +73,12 @@ module fluid_sim
         ! INTEGRATION LOOP
         w = w0
         w_cum(1, :, :) = w
-        call fftw_execute_dft_r2c(forward, w, w_hat)
-        w_hat_copy = w_hat
+        call fftw_execute_dft_r2c(forward, w, w_hat_copy)
+        w_hat = w_hat_copy
         do i = 2, steps
-            call step(w_hat_copy, Nx, Ny, Kxg, Kyg, K2, nu, dt)
-            w_hat = w_hat_copy
-            call fftw_execute_dft_c2r(backward, w_hat, w)
+            call step(w_hat, Nx, Ny, Kxg, Kyg, K2, nu, dt)
+            w_hat_copy = w_hat
+            call fftw_execute_dft_c2r(backward, w_hat_copy, w)
             w = w / (Nx * Ny) ! Normalisation
             w_cum(i, :, :) = w
         end do
@@ -91,7 +91,7 @@ module fluid_sim
         call fftw_destroy_plan(backward_padded)
         ! Release FFT variables memory
         call fftw_free(p_w)
-        call fftw_free(p_w_hat)
+        call fftw_free(p_w_hat_copy)
         call fftw_free(p_A_hat)
         call fftw_free(p_B_hat)
         call fftw_free(p_C_hat)
